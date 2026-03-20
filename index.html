@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Product Store</title>
+
+<!-- Bootstrap -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<style>
+body {
+  background: #f8f9fa;
+}
+.card {
+  margin-bottom: 20px;
+}
+.like-btn {
+  cursor: pointer;
+  color: gray;
+}
+.liked {
+  color: red;
+}
+</style>
+
+</head>
+<body>
+
+<div class="container mt-4">
+  <h2 class="text-center mb-4">Product Store</h2>
+
+  <!-- Search -->
+  <input type="text" id="search" class="form-control mb-3" placeholder="Search products...">
+
+  <!-- Filters -->
+  <div class="mb-3 text-center">
+    <button class="btn btn-primary filter" data-category="All">All</button>
+    <button class="btn btn-secondary filter" data-category="Shirt">Shirts</button>
+    <button class="btn btn-secondary filter" data-category="Pant">Pants</button>
+  </div>
+
+  <!-- Products -->
+  <div class="row" id="productContainer"></div>
+</div>
+
+<script>
+const products = [
+  {
+    id: 1,
+    name: "Blue Shirt",
+    category: "Shirt",
+    price: 500,
+    image: "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf"
+  },
+  {
+    id: 2,
+    name: "Black Pant",
+    category: "Pant",
+    price: 800,
+    image: "https://images.unsplash.com/photo-1542272604-787c3835535d"
+  },
+  {
+    id: 3,
+    name: "White Shirt",
+    category: "Shirt",
+    price: 600,
+    image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab"
+  },
+  {
+    id: 4,
+    name: "Jeans Pant",
+    category: "Pant",
+    price: 900,
+    image: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246"
+  }
+];
+
+let filteredProducts = [...products];
+let likes = JSON.parse(localStorage.getItem("likes")) || {};
+
+function displayProducts(data) {
+  const container = document.getElementById("productContainer");
+  container.innerHTML = "";
+
+  data.forEach(product => {
+    const isLiked = likes[product.id] || false;
+    const count = likes[product.id+"_count"] || 0;
+
+    container.innerHTML += `
+      <div class="col-md-3">
+        <div class="card p-2">
+          <img src="${product.image}" class="card-img-top" style="height:200px;object-fit:cover;">
+          <div class="card-body">
+            <h5>${product.name}</h5>
+            <p>₹${product.price}</p>
+            <p>${product.category}</p>
+            <span class="like-btn ${isLiked ? "liked" : ""}" onclick="toggleLike(${product.id})">
+              ❤️ ${count}
+            </span>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+}
+
+function toggleLike(id) {
+  likes[id] = !likes[id];
+  if (!likes[id+"_count"]) likes[id+"_count"] = 0;
+
+  likes[id+"_count"] += likes[id] ? 1 : -1;
+
+  localStorage.setItem("likes", JSON.stringify(likes));
+  displayProducts(filteredProducts);
+}
+
+// Filter
+document.querySelectorAll(".filter").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const cat = btn.dataset.category;
+    filteredProducts = cat === "All" ? products : products.filter(p => p.category === cat);
+    displayProducts(filteredProducts);
+  });
+});
+
+// Search
+document.getElementById("search").addEventListener("input", e => {
+  const val = e.target.value.toLowerCase();
+  filteredProducts = products.filter(p => p.name.toLowerCase().includes(val));
+  displayProducts(filteredProducts);
+});
+
+displayProducts(products);
+</script>
+
+</body>
+</html>
